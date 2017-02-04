@@ -15,6 +15,7 @@
 		013311261E4543BD00D6D430 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 013311241E4543BD00D6D430 /* LaunchScreen.storyboard */; };
 		013311311E4543BD00D6D430 /* AlertQueueTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 013311301E4543BD00D6D430 /* AlertQueueTests.m */; };
 		0133113C1E4543BD00D6D430 /* AlertQueueUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0133113B1E4543BD00D6D430 /* AlertQueueUITests.m */; };
+		0133114B1E4543DF00D6D430 /* AlertQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 0133114A1E4543DF00D6D430 /* AlertQueue.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,8 @@
 		013311371E4543BD00D6D430 /* AlertQueueUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AlertQueueUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0133113B1E4543BD00D6D430 /* AlertQueueUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlertQueueUITests.m; sourceTree = "<group>"; };
 		0133113D1E4543BD00D6D430 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		013311491E4543DF00D6D430 /* AlertQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlertQueue.h; sourceTree = "<group>"; };
+		0133114A1E4543DF00D6D430 /* AlertQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlertQueue.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +108,8 @@
 				0133111A1E4543BD00D6D430 /* AppDelegate.m */,
 				0133111C1E4543BD00D6D430 /* ViewController.h */,
 				0133111D1E4543BD00D6D430 /* ViewController.m */,
+				013311491E4543DF00D6D430 /* AlertQueue.h */,
+				0133114A1E4543DF00D6D430 /* AlertQueue.m */,
 				0133111F1E4543BD00D6D430 /* Main.storyboard */,
 				013311221E4543BD00D6D430 /* Assets.xcassets */,
 				013311241E4543BD00D6D430 /* LaunchScreen.storyboard */,
@@ -273,6 +278,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0133114B1E4543DF00D6D430 /* AlertQueue.m in Sources */,
 				0133111E1E4543BD00D6D430 /* ViewController.m in Sources */,
 				0133111B1E4543BD00D6D430 /* AppDelegate.m in Sources */,
 				013311181E4543BD00D6D430 /* main.m in Sources */,

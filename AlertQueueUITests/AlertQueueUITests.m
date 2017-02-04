@@ -7,6 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "AlertQueue.h"
 
 @interface AlertQueueUITests : XCTestCase
 
@@ -32,9 +33,40 @@
     [super tearDown];
 }
 
-- (void)testExample {
-    // Use recording to get started writing UI tests.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
+- (void)testAlertView {
+    
+    XCUIApplication *app = [[XCUIApplication alloc] init];
+    [app.buttons[@"alert view test"] tap];
+    [app.alerts[@"av"].buttons[@"Cancel"] tap];
+    [app.alerts[@"Test1"].buttons[@"OK"] tap];
+    
+}
+
+- (void)testTwoAlerts {
+    
+    XCUIApplication *app = [[XCUIApplication alloc] init];
+    [app.buttons[@"two alerts"] tap];
+    [app.alerts[@"Test1"].buttons[@"OK"] tap];
+    [app.alerts[@"Test2"].buttons[@"OK"] tap];
+    
+}
+
+- (void)testCancelDisplayed {
+    
+    XCUIApplication *app = [[XCUIApplication alloc] init];
+    [app.buttons[@"cancel displayed"] tap];
+    [NSThread sleepForTimeInterval:1.1];
+    [app.alerts[@"Test2"].buttons[@"OK"] tap];
+    
+}
+
+- (void)testCancelQueued {
+    
+    XCUIApplication *app = [[XCUIApplication alloc] init];
+    [app.buttons[@"cancel queued"] tap];
+    [NSThread sleepForTimeInterval:1.1];
+    [app.alerts[@"Test1"].buttons[@"OK"] tap];
+    
 }
 
 @end
