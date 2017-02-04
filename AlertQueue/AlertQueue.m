@@ -98,6 +98,7 @@
     }
     if(self.internalQueuedAlerts.count == 0) {
         self.window.hidden = YES;
+        [self.window resignKeyWindow];
         return;
     }
     self.displayedAlert = self.internalQueuedAlerts[0];
