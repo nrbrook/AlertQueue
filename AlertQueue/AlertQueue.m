@@ -8,37 +8,45 @@
 
 #import "AlertQueue.h"
 
-@interface AlertQueue()
+@protocol AlertRootViewControllerDelegate;
 
-@property(nonatomic, strong, nonnull) NSMutableArray<AlertQueueItem *> *internalQueuedAlerts;
-@property(nonatomic, strong, nullable) AlertQueueItem *displayedAlert;
-@property(nonatomic, strong) UIWindow *window;
+@interface AlertRootViewController : UIViewController
 
-- (void)alertControllerDismissed:(nonnull UIAlertController *)alert;
+@property(nonatomic, nullable, weak) id<AlertRootViewControllerDelegate> delegate;
 
 @end
 
-@interface AlertViewController : UIAlertController
+@protocol AlertRootViewControllerDelegate <NSObject>
+@required
+- (void)viewControllerAlertDismissed:(AlertRootViewController *)viewController;
 
 @end
 
-@implementation AlertViewController
+@implementation AlertRootViewController
 
-- (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    [[AlertQueue sharedQueue] alertControllerDismissed:self];
+- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {
+    [super dismissViewControllerAnimated:flag completion:completion];
+    [self.delegate viewControllerAlertDismissed:self];
 }
 
 @end
 
 @interface AlertQueueItem()
 
-@property(nonatomic, strong) AlertViewController *alert;
+@property(nonatomic, strong) UIAlertController *alert;
 @property(nonatomic, strong, nullable) NSDictionary * userInfo;
 
 @end
 
 @implementation AlertQueueItem
+
+@end
+
+@interface AlertQueue() <AlertRootViewControllerDelegate>
+
+@property(nonatomic, strong, nonnull) NSMutableArray<AlertQueueItem *> *internalQueuedAlerts;
+@property(nonatomic, strong, nullable) AlertQueueItem *displayedAlert;
+@property(nonatomic, strong) UIWindow *window;
 
 @end
 
@@ -61,11 +69,15 @@
         self.window.windowLevel = UIWindowLevelAlert;
         self.window.backgroundColor = nil;
         self.window.opaque = NO;
-        self.window.rootViewController = [[UIViewController alloc] init];
-        self.window.rootViewController.view.backgroundColor = nil;
-        self.window.rootViewController.view.opaque = NO;
+        AlertRootViewController *rvc = [[AlertRootViewController alloc] init];
+        rvc.delegate = self;
+        rvc.view.backgroundColor = nil;
+        rvc.view.opaque = NO;
+        self.window.rootViewController = rvc;
         self.internalQueuedAlerts = [NSMutableArray arrayWithCapacity:1];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeHidden:) name:UIWindowDidBecomeHiddenNotification object:nil];
+        
+        self.presented = [NSMutableArray arrayWithCapacity:1];
     }
     return self;
 }
@@ -78,11 +90,9 @@
     [self displayAlertIfPossible];
 }
 
-- (void)alertControllerDismissed:(UIAlertController *)alert {
-    if(alert != self.displayedAlert.alert) {
-        return;
-    }
+- (void)viewControllerAlertDismissed:(AlertRootViewController *)viewController {
     AlertQueueItem *item = self.displayedAlert;
+    [self.presented addObject:item];
     self.displayedAlert = nil;
     [self.internalQueuedAlerts removeObjectAtIndex:0];
     if([item.delegate respondsToSelector:@selector(alertDismissed:)]) {
@@ -104,18 +114,20 @@
     self.displayedAlert = self.internalQueuedAlerts[0];
     self.window.frame = [UIScreen mainScreen].bounds;
     [self.window makeKeyAndVisible];
-    [self.window.rootViewController presentViewController:(AlertViewController * _Nonnull)self.displayedAlert.alert animated:YES completion:nil];
+    [self.window.rootViewController presentViewController:(UIViewController * _Nonnull)self.displayedAlert.alert animated:YES completion:nil];
     if([self.displayedAlert.delegate respondsToSelector:@selector(alertDisplayed:)]) {
         [self.displayedAlert.delegate alertDisplayed:(AlertQueueItem * _Nonnull)self.displayedAlert];
     }
 }
 
-- (AlertQueueItem *)displayAlert:(UIAlertController *)alert delegate:(id<AlertQueueItemDelegate>)delegate userInfo:(id)userInfo {
-    AlertQueueItem * item = [AlertQueueItem new];
-    item.alert = [AlertViewController alertControllerWithTitle:alert.title message:alert.message preferredStyle:alert.preferredStyle];
-    for(UIAlertAction *a in alert.actions) {
-        [item.alert addAction:a];
+- (AlertQueueItem *)displayAlert:(UIAlertController *)alert delegate:(id<AlertQueueItemDelegate>)delegate userInfo:(NSDictionary *)userInfo {
+    if(alert.preferredStyle != UIAlertControllerStyleAlert) { // cannot display action sheets
+        return nil;
     }
+    AlertQueueItem * item = [AlertQueueItem new];
+    item.alert = alert;
+    item.delegate = delegate;
+    item.userInfo = userInfo;
     [self.internalQueuedAlerts addObject:item];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self displayAlertIfPossible];

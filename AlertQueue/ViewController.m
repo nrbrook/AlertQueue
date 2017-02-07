@@ -31,7 +31,9 @@
     [av show];
     
     UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"Test1" message:@"Test1" preferredStyle:UIAlertControllerStyleAlert];
-    [ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+    [ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        NSLog(@"Alert!");
+    }]];
     AlertQueueItem *item = [[AlertQueue sharedQueue] displayAlert:ac delegate:nil userInfo:nil];
     
 }
