@@ -513,6 +513,7 @@
 				013311421E4543BD00D6D430 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		013311431E4543BD00D6D430 /* Build configuration list for PBXNativeTarget "AlertQueueTests" */ = {
 			isa = XCConfigurationList;
@@ -521,6 +522,7 @@
 				013311451E4543BD00D6D430 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		013311461E4543BD00D6D430 /* Build configuration list for PBXNativeTarget "AlertQueueUITests" */ = {
 			isa = XCConfigurationList;
@@ -529,6 +531,7 @@
 				013311481E4543BD00D6D430 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
