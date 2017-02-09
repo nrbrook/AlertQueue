@@ -144,7 +144,8 @@
 }
 
 - (NSArray<AlertQueueItem *> *)queuedAlerts {
-    return _internalQueuedAlerts;
+    // returns new array so original can be manipulated (alerts cancelled) while enumerating
+    return [NSArray arrayWithArray:_internalQueuedAlerts];
 }
 
 @end
