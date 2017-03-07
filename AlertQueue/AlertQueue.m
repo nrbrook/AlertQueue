@@ -35,6 +35,7 @@
 
 @property(nonatomic, strong) UIAlertController *alert;
 @property(nonatomic, strong, nullable) NSDictionary * userInfo;
+@property(nonatomic, weak) UIViewController *presentingController;
 
 @end
 
@@ -76,8 +77,6 @@
         self.window.rootViewController = rvc;
         self.internalQueuedAlerts = [NSMutableArray arrayWithCapacity:1];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeHidden:) name:UIWindowDidBecomeHiddenNotification object:nil];
-        
-        self.presented = [NSMutableArray arrayWithCapacity:1];
     }
     return self;
 }
@@ -92,9 +91,8 @@
 
 - (void)viewControllerAlertDismissed:(AlertRootViewController *)viewController {
     AlertQueueItem *item = self.displayedAlert;
-    [self.presented addObject:item];
     self.displayedAlert = nil;
-    [self.internalQueuedAlerts removeObjectAtIndex:0];
+    [self.internalQueuedAlerts removeObject:item];
     if([item.delegate respondsToSelector:@selector(alertDismissed:)]) {
         [item.delegate alertDismissed:(AlertQueueItem * _Nonnull)item];
     }
@@ -121,6 +119,10 @@
 }
 
 - (AlertQueueItem *)displayAlert:(UIAlertController *)alert delegate:(id<AlertQueueItemDelegate>)delegate userInfo:(NSDictionary *)userInfo {
+    return [self displayAlert:alert fromController:nil delegate:delegate userInfo:userInfo];
+}
+
+- (AlertQueueItem *)displayAlert:(UIAlertController *)alert fromController:(UIViewController *)viewController delegate:(id<AlertQueueItemDelegate>)delegate userInfo:(NSDictionary *)userInfo {
     if(alert.preferredStyle != UIAlertControllerStyleAlert) { // cannot display action sheets
         return nil;
     }
@@ -128,6 +130,7 @@
     item.alert = alert;
     item.delegate = delegate;
     item.userInfo = userInfo;
+    item.presentingController = viewController;
     [self.internalQueuedAlerts addObject:item];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self displayAlertIfPossible];
@@ -135,11 +138,21 @@
     return item;
 }
 
+
+
 - (void)cancelAlert:(AlertQueueItem *)item {
+    [self.internalQueuedAlerts removeObject:item];
     if(item == self.displayedAlert) {
         [self.displayedAlert.alert dismissViewControllerAnimated:YES completion:nil];
-    } else {
-        [self.internalQueuedAlerts removeObject:item];
+    }
+}
+
+- (void)invalidateAllAlertsFromController:(UIViewController *)controller {
+    NSArray<AlertQueueItem *> *queuedAlerts = [self.internalQueuedAlerts copy];
+    for(AlertQueueItem *item in queuedAlerts) {
+        if(item.presentingController == controller) {
+            [self cancelAlert:item];
+        }
     }
 }
 
