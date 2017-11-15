@@ -8,33 +8,32 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol AlertQueueItemDelegate;
+@protocol AlertQueueAlertControllerDelegate;
 
-@interface AlertQueueItem : NSObject
+@interface AlertQueueAlertController : UIAlertController
 
-@property(nonatomic, weak, nullable) id<AlertQueueItemDelegate> delegate;
-@property(nonatomic, readonly, nonnull) UIAlertController *alert;
+@property(nonatomic, weak, nullable) id<AlertQueueAlertControllerDelegate> delegate;
 @property(nonatomic, readonly, nullable) NSDictionary * userInfo;
 
 @end
 
 @interface AlertQueue : NSObject
 
-@property(nonatomic, readonly, nonnull) NSArray<AlertQueueItem *> *queuedAlerts;
-@property(nonatomic, readonly, nullable) AlertQueueItem *displayedAlert;
+@property(nonatomic, readonly, nonnull) NSArray<AlertQueueAlertController *> *queuedAlerts;
+@property(nonatomic, readonly, nullable) AlertQueueAlertController *displayedAlert;
 @property(nonatomic, strong, nonnull) NSMutableArray *presented;
 
 + (nonnull instancetype)sharedQueue;
 
-- (nullable AlertQueueItem *)displayAlert:(nonnull UIAlertController *)alert delegate:(nullable id<AlertQueueItemDelegate>)delegate userInfo:(nullable NSDictionary *)userInfo;
+- (void)displayAlert:(nonnull AlertQueueAlertController *)alert userInfo:(nullable NSDictionary *)userInfo;
 
-- (void)cancelAlert:(nonnull AlertQueueItem *)item;
+- (void)cancelAlert:(nonnull AlertQueueAlertController *)alert;
 
 @end
 
-@protocol AlertQueueItemDelegate <NSObject>
+@protocol AlertQueueAlertControllerDelegate <NSObject>
 
-- (void)alertDisplayed:(nonnull AlertQueueItem *)alertItem;
-- (void)alertDismissed:(nonnull AlertQueueItem *)alertItem;
+- (void)alertDisplayed:(nonnull AlertQueueAlertController *)alertItem;
+- (void)alertDismissed:(nonnull AlertQueueAlertController *)alertItem;
 
 @end

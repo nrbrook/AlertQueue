@@ -8,45 +8,42 @@
 
 #import "AlertQueue.h"
 
-@protocol AlertRootViewControllerDelegate;
-
-@interface AlertRootViewController : UIViewController
-
-@property(nonatomic, nullable, weak) id<AlertRootViewControllerDelegate> delegate;
-
-@end
-
-@protocol AlertRootViewControllerDelegate <NSObject>
+@protocol AlertQueueAlertControllerInternalDelegate
 @required
-- (void)viewControllerAlertDismissed:(AlertRootViewController *)viewController;
+- (void)alertQueueAlertControllerDidDismiss:(AlertQueueAlertController *)alert;
 
 @end
 
-@implementation AlertRootViewController
+@interface AlertQueueAlertController()
+
+@property(nonatomic, strong, nullable) NSDictionary * userInfo;
+@property (nonatomic, weak, nullable) id<AlertQueueAlertControllerInternalDelegate> internalDelegate;
+
+@end
+
+@implementation AlertQueueAlertController
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {
     [super dismissViewControllerAnimated:flag completion:completion];
-    [self.delegate viewControllerAlertDismissed:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self.internalDelegate alertQueueAlertControllerDidDismiss:self];
 }
 
 @end
 
-@interface AlertQueueItem()
+@interface AlertQueue() <AlertQueueAlertControllerInternalDelegate>
 
-@property(nonatomic, strong) UIAlertController *alert;
-@property(nonatomic, strong, nullable) NSDictionary * userInfo;
-
-@end
-
-@implementation AlertQueueItem
-
-@end
-
-@interface AlertQueue() <AlertRootViewControllerDelegate>
-
-@property(nonatomic, strong, nonnull) NSMutableArray<AlertQueueItem *> *internalQueuedAlerts;
-@property(nonatomic, strong, nullable) AlertQueueItem *displayedAlert;
+@property(nonatomic, strong, nonnull) NSMutableArray<AlertQueueAlertController *> *internalQueuedAlerts;
+@property(nonatomic, strong, nullable) AlertQueueAlertController *displayedAlert;
 @property(nonatomic, strong) UIWindow *window;
+@property(nonatomic, strong) UIWindow *previousKeyWindow;
 
 @end
 
@@ -69,8 +66,7 @@
         self.window.windowLevel = UIWindowLevelAlert;
         self.window.backgroundColor = nil;
         self.window.opaque = NO;
-        AlertRootViewController *rvc = [[AlertRootViewController alloc] init];
-        rvc.delegate = self;
+        UIViewController *rvc = [UIViewController new];
         rvc.view.backgroundColor = nil;
         rvc.view.opaque = NO;
         self.window.rootViewController = rvc;
@@ -90,13 +86,13 @@
     [self displayAlertIfPossible];
 }
 
-- (void)viewControllerAlertDismissed:(AlertRootViewController *)viewController {
-    AlertQueueItem *item = self.displayedAlert;
-    [self.presented addObject:item];
+- (void)alertQueueAlertControllerDidDismiss:(AlertQueueAlertController *)alert {
+    if(self.displayedAlert != alert) { return; }
+    [self.presented addObject:alert];
     self.displayedAlert = nil;
     [self.internalQueuedAlerts removeObjectAtIndex:0];
-    if([item.delegate respondsToSelector:@selector(alertDismissed:)]) {
-        [item.delegate alertDismissed:(AlertQueueItem * _Nonnull)item];
+    if([alert.delegate respondsToSelector:@selector(alertDismissed:)]) {
+        [alert.delegate alertDismissed:(AlertQueueAlertController * _Nonnull)alert];
     }
     [self displayAlertIfPossible];
 }
@@ -108,42 +104,43 @@
     }
     if(self.internalQueuedAlerts.count == 0) {
         self.window.hidden = YES;
-        [self.window resignKeyWindow];
+        [self.previousKeyWindow makeKeyWindow];
+        self.previousKeyWindow = nil;
         return;
     }
     self.displayedAlert = self.internalQueuedAlerts[0];
     self.window.frame = [UIScreen mainScreen].bounds;
-    [self.window makeKeyAndVisible];
-    [self.window.rootViewController presentViewController:(UIViewController * _Nonnull)self.displayedAlert.alert animated:YES completion:nil];
+    if(!self.window.isKeyWindow) {
+        self.previousKeyWindow = UIApplication.sharedApplication.keyWindow;
+        [self.window makeKeyAndVisible];
+    }
+    [self.window.rootViewController presentViewController:(UIViewController * _Nonnull)self.displayedAlert animated:YES completion:nil];
     if([self.displayedAlert.delegate respondsToSelector:@selector(alertDisplayed:)]) {
-        [self.displayedAlert.delegate alertDisplayed:(AlertQueueItem * _Nonnull)self.displayedAlert];
+        [self.displayedAlert.delegate alertDisplayed:(AlertQueueAlertController * _Nonnull)self.displayedAlert];
     }
 }
 
-- (AlertQueueItem *)displayAlert:(UIAlertController *)alert delegate:(id<AlertQueueItemDelegate>)delegate userInfo:(NSDictionary *)userInfo {
+- (void)displayAlert:(AlertQueueAlertController *)alert userInfo:(NSDictionary *)userInfo {
     if(alert.preferredStyle != UIAlertControllerStyleAlert) { // cannot display action sheets
-        return nil;
+        return;
     }
-    AlertQueueItem * item = [AlertQueueItem new];
-    item.alert = alert;
-    item.delegate = delegate;
-    item.userInfo = userInfo;
-    [self.internalQueuedAlerts addObject:item];
+    alert.internalDelegate = self;
+    alert.userInfo = userInfo;
+    [self.internalQueuedAlerts addObject:alert];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self displayAlertIfPossible];
     });
-    return item;
 }
 
-- (void)cancelAlert:(AlertQueueItem *)item {
-    if(item == self.displayedAlert) {
-        [self.displayedAlert.alert dismissViewControllerAnimated:YES completion:nil];
+- (void)cancelAlert:(AlertQueueAlertController *)alert {
+    if(alert == self.displayedAlert) {
+        [self.displayedAlert dismissViewControllerAnimated:YES completion:nil];
     } else {
-        [self.internalQueuedAlerts removeObject:item];
+        [self.internalQueuedAlerts removeObject:alert];
     }
 }
 
-- (NSArray<AlertQueueItem *> *)queuedAlerts {
+- (NSArray<AlertQueueAlertController *> *)queuedAlerts {
     // returns new array so original can be manipulated (alerts cancelled) while enumerating
     return [NSArray arrayWithArray:_internalQueuedAlerts];
 }
