@@ -14,6 +14,7 @@
 
 @property(nonatomic, weak, nullable) id<AlertQueueAlertControllerDelegate> delegate;
 @property(nonatomic, readonly, nullable) NSDictionary * userInfo;
+@property(nonatomic, weak, readonly, nullable) UIViewController *presentingController;
 
 @end
 
@@ -21,13 +22,16 @@
 
 @property(nonatomic, readonly, nonnull) NSArray<AlertQueueAlertController *> *queuedAlerts;
 @property(nonatomic, readonly, nullable) AlertQueueAlertController *displayedAlert;
-@property(nonatomic, strong, nonnull) NSMutableArray *presented;
 
 + (nonnull instancetype)sharedQueue;
 
 - (void)displayAlert:(nonnull AlertQueueAlertController *)alert userInfo:(nullable NSDictionary *)userInfo;
 
+- (void)displayAlert:(nonnull AlertQueueAlertController *)alert fromController:(nullable UIViewController *)viewController userInfo:(nullable NSDictionary *)userInfo;
+
 - (void)cancelAlert:(nonnull AlertQueueAlertController *)alert;
+
+- (void)invalidateAllAlertsFromController:(nonnull UIViewController *)controller;
 
 @end
 

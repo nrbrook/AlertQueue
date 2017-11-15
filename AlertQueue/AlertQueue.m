@@ -18,6 +18,7 @@
 
 @property(nonatomic, strong, nullable) NSDictionary * userInfo;
 @property (nonatomic, weak, nullable) id<AlertQueueAlertControllerInternalDelegate> internalDelegate;
+@property(nonatomic, weak) UIViewController *presentingController;
 
 @end
 
@@ -72,8 +73,6 @@
         self.window.rootViewController = rvc;
         self.internalQueuedAlerts = [NSMutableArray arrayWithCapacity:1];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeHidden:) name:UIWindowDidBecomeHiddenNotification object:nil];
-        
-        self.presented = [NSMutableArray arrayWithCapacity:1];
     }
     return self;
 }
@@ -88,7 +87,6 @@
 
 - (void)alertQueueAlertControllerDidDismiss:(AlertQueueAlertController *)alert {
     if(self.displayedAlert != alert) { return; }
-    [self.presented addObject:alert];
     self.displayedAlert = nil;
     [self.internalQueuedAlerts removeObjectAtIndex:0];
     if([alert.delegate respondsToSelector:@selector(alertDismissed:)]) {
@@ -121,11 +119,16 @@
 }
 
 - (void)displayAlert:(AlertQueueAlertController *)alert userInfo:(NSDictionary *)userInfo {
+    [self displayAlert:alert fromController:nil userInfo:userInfo];
+}
+
+- (void)displayAlert:(AlertQueueAlertController *)alert fromController:(UIViewController *)viewController userInfo:(NSDictionary *)userInfo {
     if(alert.preferredStyle != UIAlertControllerStyleAlert) { // cannot display action sheets
         return;
     }
     alert.internalDelegate = self;
     alert.userInfo = userInfo;
+    alert.presentingController = viewController;
     [self.internalQueuedAlerts addObject:alert];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self displayAlertIfPossible];
@@ -137,6 +140,15 @@
         [self.displayedAlert dismissViewControllerAnimated:YES completion:nil];
     } else {
         [self.internalQueuedAlerts removeObject:alert];
+    }
+}
+
+- (void)invalidateAllAlertsFromController:(UIViewController *)controller {
+    NSArray<AlertQueueAlertController *> *queuedAlerts = [self.internalQueuedAlerts copy];
+    for(AlertQueueAlertController *alert in queuedAlerts) {
+        if(alert.presentingController == controller) {
+            [self cancelAlert:alert];
+        }
     }
 }
 
