@@ -24,6 +24,12 @@
 
 @implementation AlertQueueAlertController
 
++ (instancetype)alertControllerWithTitle:(NSString *)title message:(NSString *)message userInfo:(NSDictionary *)userInfo {
+    AlertQueueAlertController *ac = [super alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+    ac.userInfo = userInfo;
+    return ac;
+}
+
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion {
     [super dismissViewControllerAnimated:flag completion:completion];
 }
@@ -118,6 +124,10 @@
     }
 }
 
+- (void)displayAlert:(AlertQueueAlertController *)alert {
+    [self displayAlert:alert userInfo:nil];
+}
+
 - (void)displayAlert:(AlertQueueAlertController *)alert userInfo:(NSDictionary *)userInfo {
     [self displayAlert:alert fromController:nil userInfo:userInfo];
 }
@@ -127,7 +137,15 @@
         return;
     }
     alert.internalDelegate = self;
-    alert.userInfo = userInfo;
+    if(userInfo) {
+        if(alert.userInfo) {
+            NSMutableDictionary *d = alert.userInfo.mutableCopy;
+            [d setValuesForKeysWithDictionary:userInfo];
+            alert.userInfo = d;
+        } else {
+            alert.userInfo = userInfo;
+        }
+    }
     alert.presentingController = viewController;
     [self.internalQueuedAlerts addObject:alert];
     dispatch_async(dispatch_get_main_queue(), ^{
