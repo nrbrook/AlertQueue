@@ -23,7 +23,7 @@
 @property(nonatomic, readonly, nullable) NSDictionary * userInfo;
 
 /**
- The view controller that requested the alert be displayed, if one was passed
+ The view controller that requested the alert be displayed, if one was passed when adding to the queue
  */
 @property(nonatomic, weak, readonly, nullable) UIViewController *presentingController;
 
