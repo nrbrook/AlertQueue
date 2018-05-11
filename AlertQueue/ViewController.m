@@ -30,47 +30,59 @@
     UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"av" message:@"av test" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:nil];
     [av show];
     
-    UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"Test1" message:@"Test1" preferredStyle:UIAlertControllerStyleAlert];
+    AlertQueueAlertController *ac = [AlertQueueAlertController alertControllerWithTitle:@"Test1" message:@"Test1" userInfo:nil];
     [ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         NSLog(@"Alert!");
     }]];
-    AlertQueueItem *item = [[AlertQueue sharedQueue] displayAlert:ac delegate:nil userInfo:nil];
+	[[AlertQueue sharedQueue] displayAlert:ac fromController:self userInfo:nil];
     
 }
 
 
 - (IBAction)twoAlerts:(id)sender {
-    UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"Test1" message:@"Test1" preferredStyle:UIAlertControllerStyleAlert];
-    [ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-    AlertQueueItem *item = [[AlertQueue sharedQueue] displayAlert:ac delegate:nil userInfo:nil];
-    UIAlertController *ac2 = [UIAlertController alertControllerWithTitle:@"Test2" message:@"Test2" preferredStyle:UIAlertControllerStyleAlert];
-    [ac2 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-    AlertQueueItem *item2 = [[AlertQueue sharedQueue] displayAlert:ac2 delegate:nil userInfo:nil];
+	AlertQueueAlertController *ac = [AlertQueueAlertController alertControllerWithTitle:@"Test1" message:@"Test1" userInfo:nil];
+	[ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac fromController:self userInfo:nil];
+	AlertQueueAlertController *ac2 = [AlertQueueAlertController alertControllerWithTitle:@"Test2" message:@"Test2" userInfo:nil];
+	[ac2 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert2!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac2 fromController:self userInfo:nil];
 }
 
 - (IBAction)cancelDisplayed:(id)sender {
-    
-    UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"Test1" message:@"Test1" preferredStyle:UIAlertControllerStyleAlert];
-    [ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-    AlertQueueItem *item = [[AlertQueue sharedQueue] displayAlert:ac delegate:nil userInfo:nil];
-    UIAlertController *ac2 = [UIAlertController alertControllerWithTitle:@"Test2" message:@"Test2" preferredStyle:UIAlertControllerStyleAlert];
-    [ac2 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-    AlertQueueItem *item2 = [[AlertQueue sharedQueue] displayAlert:ac2 delegate:nil userInfo:nil];
-    [NSTimer scheduledTimerWithTimeInterval:3 repeats:NO block:^(NSTimer * _Nonnull timer) {
-        [[AlertQueue sharedQueue] cancelAlert:item];
-    }];
+	AlertQueueAlertController *ac = [AlertQueueAlertController alertControllerWithTitle:@"Test1" message:@"Test1" userInfo:nil];
+	[ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac fromController:self userInfo:nil];
+	AlertQueueAlertController *ac2 = [AlertQueueAlertController alertControllerWithTitle:@"Test2" message:@"Test2" userInfo:nil];
+	[ac2 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert2!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac2 fromController:self userInfo:nil];
+	[NSTimer scheduledTimerWithTimeInterval:3 repeats:NO block:^(NSTimer * _Nonnull timer) {
+		[[AlertQueue sharedQueue] cancelAlert:ac];
+	}];
+	
 }
 
 - (IBAction)cancelQueued:(id)sender {
-    UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"Test1" message:@"Test1" preferredStyle:UIAlertControllerStyleAlert];
-    [ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-    AlertQueueItem *item = [[AlertQueue sharedQueue] displayAlert:ac delegate:nil userInfo:nil];
-    UIAlertController *ac2 = [UIAlertController alertControllerWithTitle:@"Test2" message:@"Test2" preferredStyle:UIAlertControllerStyleAlert];
-    [ac2 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-    AlertQueueItem *item2 = [[AlertQueue sharedQueue] displayAlert:ac2 delegate:nil userInfo:nil];
-    [NSTimer scheduledTimerWithTimeInterval:1 repeats:NO block:^(NSTimer * _Nonnull timer) {
-        [[AlertQueue sharedQueue] cancelAlert:item2];
-    }];
+	AlertQueueAlertController *ac = [AlertQueueAlertController alertControllerWithTitle:@"Test1" message:@"Test1" userInfo:nil];
+	[ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac fromController:self userInfo:nil];
+	AlertQueueAlertController *ac2 = [AlertQueueAlertController alertControllerWithTitle:@"Test2" message:@"Test2" userInfo:nil];
+	[ac2 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert2!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac2 fromController:self userInfo:nil];
+	[NSTimer scheduledTimerWithTimeInterval:3 repeats:NO block:^(NSTimer * _Nonnull timer) {
+		[[AlertQueue sharedQueue] cancelAlert:ac2];
+	}];
 }
 
 @end
