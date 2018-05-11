@@ -85,4 +85,26 @@
 	}];
 }
 
+- (IBAction)cancelAllFromViewController:(id)sender {
+	AlertQueueAlertController *ac = [AlertQueueAlertController alertControllerWithTitle:@"Test1" message:@"Test1" userInfo:nil];
+	[ac addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac fromController:self userInfo:nil];
+	AlertQueueAlertController *ac2 = [AlertQueueAlertController alertControllerWithTitle:@"Test2" message:@"Test2" userInfo:nil];
+	[ac2 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert2!");
+	}]];
+	[[AlertQueue sharedQueue] displayAlert:ac2 fromController:self userInfo:nil];
+	AlertQueueAlertController *ac3 = [AlertQueueAlertController alertControllerWithTitle:@"Test3" message:@"Test3" userInfo:nil];
+	[ac3 addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSLog(@"Alert3!");
+	}]];
+	// DO NOT PASS VIEW CONTROLLER. This alert will not be cancelled.
+	[[AlertQueue sharedQueue] displayAlert:ac3 fromController:nil userInfo:nil];
+	[NSTimer scheduledTimerWithTimeInterval:3 repeats:NO block:^(NSTimer * _Nonnull timer) {
+		[[AlertQueue sharedQueue] invalidateAllAlertsFromController:self];
+	}];
+}
+
 @end
