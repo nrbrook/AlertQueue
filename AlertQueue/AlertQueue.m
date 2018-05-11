@@ -1,9 +1,9 @@
 //
 //  AlertQueue.m
-//  LifeStyleLock
+//  Nick Brook
 //
 //  Created by Nick Brook on 03/02/2017.
-//  Copyright © 2017 LifeStyleLock. All rights reserved.
+//  Copyright © 2018 Nick Brook. All rights reserved.
 //
 
 #import "AlertQueue.h"
